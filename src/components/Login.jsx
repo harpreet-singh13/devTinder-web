@@ -8,10 +8,11 @@ import { BASE_URL } from "../utils/constants";
 const Login = () => {
   const [userName, setUserName] = useState("elon@gmail.com");
   const [password, setPassword] = useState("Elon@123");
+  const [error, setError] = useState("");
 
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
+
   const handleLogin = async () => {
     try {
       const res = await axios.post(
@@ -22,11 +23,12 @@ const Login = () => {
         },
         { withCredentials: true }
       );
-      //   console.log(res.data);
+      // console.log(res.data);
       dispatch(addUser(res.data));
-      navigate("/");
+      return navigate("/");
     } catch (error) {
       console.error(error);
+      setError(error.response.data);
     }
   };
 
@@ -107,6 +109,7 @@ const Login = () => {
             <br />
             At least one uppercase letter
           </p>
+          <p className="text-error">{error}</p>
           <div className="card-actions justify-center my-3">
             <button className="btn btn-primary" onClick={handleLogin}>
               Login
