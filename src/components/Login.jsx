@@ -6,8 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
 
 const Login = () => {
-  const [userName, setUserName] = useState("elon@gmail.com");
-  const [password, setPassword] = useState("Elon@123");
+  const [userName, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [isLoginForm, setIsLoginForm] = useState(true);
   const [error, setError] = useState("");
 
   const dispatch = useDispatch();
@@ -32,12 +35,60 @@ const Login = () => {
     }
   };
 
+  const handleSignUp = async () => {
+    try {
+      const res = await axios.post(
+        BASE_URL + "/signup",
+        {
+          firstName: firstName,
+          lastName: lastName,
+          emailId: userName,
+          password: password,
+        },
+        { withCredentials: true }
+      );
+
+      console.log(res?.data?.data);
+      dispatch(addUser(res.data));
+      return navigate("/profile");
+    } catch (error) {
+      console.error(error);
+      setError(error.response.data);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center my-20">
       <div className="card bg-base-300 w-96 shadow-sm">
         <div className="card-body">
-          <h2 className="card-title">Login</h2>
-          <label className="input validator mt-2">
+          <h2 className="card-title justify-center">
+            {isLoginForm ? "Login" : "Sign Up"}
+          </h2>
+
+          {!isLoginForm && (
+            <>
+              <fieldset className="fieldset my-1">
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="First Name"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </fieldset>
+
+              <fieldset className="fieldset my-1">
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="Last Name"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+              </fieldset>
+            </>
+          )}
+          <label className="input validator my-1.5 p-2">
             <svg
               className="h-[1em] opacity-50"
               xmlns="http://www.w3.org/2000/svg"
@@ -66,13 +117,13 @@ const Login = () => {
               onChange={(e) => setUserName(e.target.value)}
             />
           </label>
-          <p className="validator-hint -mt-2">
+          <p className="validator-hint hidden">
             Must be 3 to 30 characters
             <br />
             containing only letters, numbers or dash
           </p>
 
-          <label className="input validator ">
+          <label className="input validator my-1.5 p-2">
             <svg
               className="h-[1em] opacity-50"
               xmlns="http://www.w3.org/2000/svg"
@@ -111,10 +162,21 @@ const Login = () => {
           </p>
           <p className="text-error">{error}</p>
           <div className="card-actions justify-center my-3">
-            <button className="btn btn-primary" onClick={handleLogin}>
-              Login
+            <button
+              className="btn btn-primary"
+              onClick={isLoginForm ? handleLogin : handleSignUp}
+            >
+              {isLoginForm ? "Login" : "Sign Up"}
             </button>
           </div>
+          <p
+            onClick={() => setIsLoginForm(!isLoginForm)}
+            className="text-center cursor-pointer"
+          >
+            {isLoginForm
+              ? "New User? Sign Up Here"
+              : "Existing User? Login Here"}
+          </p>
         </div>
       </div>
     </div>
