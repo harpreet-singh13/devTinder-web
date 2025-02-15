@@ -18,6 +18,8 @@ const EditProfile = ({ user }) => {
   const dispatch = useDispatch();
 
   const handleEditProfile = async () => {
+    // clear the error
+    setError("");
     try {
       // Add your code here
       const res = await axios.patch(
@@ -36,6 +38,7 @@ const EditProfile = ({ user }) => {
       }, 2000);
     } catch (error) {
       console.error(error);
+      setError(error);
     }
   };
 
