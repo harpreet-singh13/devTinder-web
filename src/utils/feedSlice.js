@@ -7,7 +7,7 @@ export const feedSlice = createSlice({
     addFeed: (state, action) => {
       return action.payload;
     },
-    removeFeed: (state, action) => {
+    removeFeed: () => {
       return null;
     },
   },
