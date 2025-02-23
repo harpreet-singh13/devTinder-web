@@ -2,8 +2,9 @@ import { useState } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
+import { ImSpinner8 } from "react-icons/im"; // For loading spinner
 
 const Login = () => {
   const [userName, setUserName] = useState("");
@@ -12,11 +13,22 @@ const Login = () => {
   const [lastName, setLastName] = useState("");
   const [isLoginForm, setIsLoginForm] = useState(true);
   const [error, setError] = useState("");
+  const [isUsernameFocused, setIsUsernameFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Email validation function
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  // Handle login
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       const res = await axios.post(
         BASE_URL + "/login",
@@ -26,16 +38,19 @@ const Login = () => {
         },
         { withCredentials: true }
       );
-      // console.log(res.data);
       dispatch(addUser(res.data));
-      return navigate("/");
+      navigate("/");
     } catch (error) {
       console.error(error);
-      setError(error.response.data);
+      setError(error.response?.data || "An error occurred during login.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Handle signup
   const handleSignUp = async () => {
+    setIsLoading(true);
     try {
       const res = await axios.post(
         BASE_URL + "/signup",
@@ -47,136 +62,117 @@ const Login = () => {
         },
         { withCredentials: true }
       );
-
-      console.log(res?.data?.data);
       dispatch(addUser(res.data));
-      return navigate("/profile");
+      navigate("/profile");
     } catch (error) {
       console.error(error);
-      setError(error.response.data);
+      setError(error.response?.data || "An error occurred during signup.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center my-20">
-      <div className="card bg-base-300 w-96 shadow-sm">
-        <div className="card-body">
-          <h2 className="card-title justify-center">
+    <div className="flex items-center justify-center min-h-48 bg-base-100 my-20">
+      <div className="card bg-base-300 w-96 shadow-lg rounded-lg">
+        <div className="card-body p-6">
+          <h2 className="card-title text-2xl font-bold text-center mb-4">
             {isLoginForm ? "Login" : "Sign Up"}
           </h2>
 
           {!isLoginForm && (
             <>
-              <fieldset className="fieldset my-1">
+              <div className="space-y-4">
                 <input
                   type="text"
-                  className="input"
+                  className="input w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   placeholder="First Name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                 />
-              </fieldset>
-
-              <fieldset className="fieldset my-1">
                 <input
                   type="text"
-                  className="input"
+                  className="input w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
                   placeholder="Last Name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                 />
-              </fieldset>
+              </div>
             </>
           )}
-          <label className="input validator my-1.5 p-2">
-            <svg
-              className="h-[1em] opacity-50"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </g>
-            </svg>
+
+          <div className="space-y-4 mt-4">
             <input
-              type="input"
-              required
-              placeholder="Username"
-              pattern="[A-Za-z][A-Za-z0-9\-]*"
-              minLength="3"
-              maxLength="30"
-              title="Only letters, numbers or dash"
+              type="email"
+              className={`input w-full p-2 border ${
+                isUsernameFocused && !validateEmail(userName)
+                  ? "border-red-500"
+                  : "border-gray-300"
+              } rounded focus:outline-none focus:border-blue-500`}
+              placeholder="Email"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
+              onFocus={() => setIsUsernameFocused(true)}
+              onBlur={() => setIsUsernameFocused(false)}
             />
-          </label>
-          <p className="validator-hint hidden">
-            Must be 3 to 30 characters
-            <br />
-            containing only letters, numbers or dash
-          </p>
+            {isUsernameFocused && !validateEmail(userName) && (
+              <p className="text-red-500 text-sm">
+                Please enter a valid email address.
+              </p>
+            )}
 
-          <label className="input validator my-1.5 p-2">
-            <svg
-              className="h-[1em] opacity-50"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-            >
-              <g
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeWidth="2.5"
-                fill="none"
-                stroke="currentColor"
-              >
-                <path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"></path>
-                <circle cx="16.5" cy="7.5" r=".5" fill="currentColor"></circle>
-              </g>
-            </svg>
             <input
               type="password"
-              required
+              className="input w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
               placeholder="Password"
-              minLength="8"
-              pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-              title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onFocus={() => setIsPasswordFocused(true)}
+              onBlur={() => setIsPasswordFocused(false)}
             />
-          </label>
-          <p className="validator-hint hidden ">
-            Must be more than 8 characters, including
-            <br />
-            At least one number
-            <br />
-            At least one lowercase letter
-            <br />
-            At least one uppercase letter
-          </p>
-          <p className="text-error">{error}</p>
-          <div className="card-actions justify-center my-3">
+            {isPasswordFocused && (
+              <p className="text-gray-600 text-sm">
+                Must be 8+ characters, including a number, lowercase, and
+                uppercase letter.
+              </p>
+            )}
+          </div>
+
+          {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
+
+          <div className="card-actions justify-center mt-6">
             <button
-              className="btn btn-primary"
+              className="btn btn-primary w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-300 flex items-center justify-center"
               onClick={isLoginForm ? handleLogin : handleSignUp}
+              disabled={isLoading}
             >
-              {isLoginForm ? "Login" : "Sign Up"}
+              {isLoading ? (
+                <ImSpinner8 className="animate-spin mr-2" />
+              ) : isLoginForm ? (
+                "Login"
+              ) : (
+                "Sign Up"
+              )}
             </button>
           </div>
-          <p
-            onClick={() => setIsLoginForm(!isLoginForm)}
-            className="text-center cursor-pointer"
-          >
-            {isLoginForm
-              ? "New User? Sign Up Here"
-              : "Existing User? Login Here"}
-          </p>
+
+          <div className="text-center mt-4">
+            <p
+              onClick={() => setIsLoginForm(!isLoginForm)}
+              className="text-blue-500 cursor-pointer hover:underline"
+            >
+              {isLoginForm
+                ? "New User? Sign Up Here"
+                : "Existing User? Login Here"}
+            </p>
+            {isLoginForm && (
+              <Link to="/forgotPassword">
+                <p className="text-blue-500 cursor-pointer hover:underline mt-2">
+                  Forgot Password?
+                </p>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </div>

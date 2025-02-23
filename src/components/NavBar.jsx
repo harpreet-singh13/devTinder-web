@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { removeUser } from "../utils/userSlice";
+import { emptyFeed } from "../utils/feedSlice";
 import { useDispatch } from "react-redux";
 
 const NavBar = () => {
@@ -16,6 +17,7 @@ const NavBar = () => {
       await axios.post(BASE_URL + "/logout", {}, { withCredentials: true });
       // Clear the redux store
       dispatch(removeUser());
+      dispatch(emptyFeed());
       // Redirect to the login page
       return navigate("/login");
     } catch (err) {
@@ -27,8 +29,9 @@ const NavBar = () => {
     <>
       <div className="navbar bg-base-300 shadow-sm">
         <div className="flex-1">
-          <Link to="/" className="btn btn-ghost text-xl">
-            DevTinder
+          <Link to="/" className="btn btn-ghost text-2xl font-bold">
+            <img src="public\devLink.svg" alt="logo" className="w-10 "></img>{" "}
+            DevLink
           </Link>
         </div>
         {user && (
