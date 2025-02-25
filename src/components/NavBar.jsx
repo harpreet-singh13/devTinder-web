@@ -30,8 +30,7 @@ const NavBar = () => {
       <div className="navbar bg-base-300 shadow-sm">
         <div className="flex-1">
           <Link to="/" className="btn btn-ghost text-2xl font-bold">
-            <img src="public\devLink.svg" alt="logo" className="w-10 "></img>{" "}
-            DevLink
+            <img src="/devLink.svg" alt="logo" className="w-10 "></img> DevLink
           </Link>
         </div>
         {user && (
