@@ -106,7 +106,7 @@ const ForgotPassword = () => {
       <div className="flex items-center justify-center min-h-48 bg-base-100 my-20">
         <div className="card bg-base-300 w-96 shadow-lg rounded-lg">
           <div className="card-body p-6">
-            <h2 className="card-title">Forgot Password</h2>
+            <h2 className="card-title text-2xl font-bold">Forgot Password</h2>
             <div className="space-y-4 mt-4">
               <input
                 type="email"
@@ -137,7 +137,7 @@ const ForgotPassword = () => {
                   ? "Sending..."
                   : buttonDisabled
                   ? `Resend in ${countdown}s`
-                  : "Send Reset Link"}
+                  : "Send reset link"}
               </button>
             </div>
             <div className="text-center mt-4">
