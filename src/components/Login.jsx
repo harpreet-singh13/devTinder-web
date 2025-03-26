@@ -16,6 +16,7 @@ const Login = () => {
   const [isUsernameFocused, setIsUsernameFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [useDemoCredentials, setUseDemoCredentials] = useState(false);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -31,6 +32,18 @@ const Login = () => {
     // const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
     // return re.test(pass);
     return pass.length >= 8;
+  };
+
+  const handleDemoCredentialsChange = (e) => {
+    const isChecked = e.target.checked;
+    setUseDemoCredentials(isChecked);
+    if (isChecked) {
+      setUserName("diljit@gmail.com");
+      setPassword("Diljit@123");
+    } else {
+      setUserName("");
+      setPassword("");
+    }
   };
 
   const handleLogin = async () => {
@@ -152,6 +165,7 @@ const Login = () => {
                 onFocus={() => setIsUsernameFocused(true)}
                 onBlur={() => setIsUsernameFocused(false)}
                 required
+                disabled={useDemoCredentials}
               />
               {isUsernameFocused && !validateEmail(userName) && (
                 <p className="text-error text-sm mt-1">
@@ -179,6 +193,7 @@ const Login = () => {
                 onFocus={() => setIsPasswordFocused(true)}
                 onBlur={() => setIsPasswordFocused(false)}
                 required
+                disabled={useDemoCredentials}
               />
               {isPasswordFocused && !isLoginForm && (
                 <p
@@ -213,7 +228,21 @@ const Login = () => {
             </div>
           )}
 
-          <div className="card-actions justify-center mt-6">
+          {isLoginForm && (
+            <div className="form-control">
+              <label className="label cursor-pointer justify-start">
+                <input
+                  type="checkbox"
+                  className="checkbox checkbox-primary"
+                  checked={useDemoCredentials}
+                  onChange={handleDemoCredentialsChange}
+                />
+                <span className="label-text">Use Demo Credentials</span>
+              </label>
+            </div>
+          )}
+
+          <div className="card-actions justify-center mt-2">
             <button
               className="btn btn-primary w-full"
               onClick={isLoginForm ? handleLogin : handleSignUp}
@@ -237,6 +266,7 @@ const Login = () => {
               onClick={() => {
                 setIsLoginForm(!isLoginForm);
                 setError("");
+                setUseDemoCredentials(false);
               }}
               className="link link-primary"
             >
