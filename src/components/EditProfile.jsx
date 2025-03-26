@@ -18,19 +18,15 @@ const EditProfile = ({ user }) => {
   const dispatch = useDispatch();
 
   const handleEditProfile = async () => {
-    // clear the error
     setError("");
     try {
-      // Add your code here
       const res = await axios.patch(
         BASE_URL + "/profile/edit",
         { firstName, lastName, photoUrl, age, gender, about },
         { withCredentials: true }
       );
 
-      console.log(res?.data?.data);
       dispatch(addUser(res?.data?.data));
-
       setToast(true);
 
       setTimeout(() => {
@@ -38,101 +34,172 @@ const EditProfile = ({ user }) => {
       }, 2000);
     } catch (error) {
       console.error(error);
-      setError(error);
+      setError(error.response?.data?.message || "An error occurred");
     }
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-base-200 py-8 px-4">
       {toast && (
-        <div className="toast toast-top toast-center z-10">
-          <div className="alert alert-success">
+        <div className="toast toast-top toast-center z-50">
+          <div className="alert alert-success shadow-lg">
             <span>Profile saved successfully.</span>
           </div>
         </div>
       )}
-      <div className="flex  justify-center my-10 ">
-        <div className="flex items-center justify-center mx-15 ">
-          <div className="card bg-base-300 w-96 shadow-sm">
-            <div className="card-body">
-              <h2 className="card-title justify-center">Edit Profile</h2>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">First Name</legend>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Type here"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </fieldset>
 
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Last Name</legend>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Type here"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </fieldset>
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-center mb-8">
+          Edit Your Profile
+        </h1>
 
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Photo URL</legend>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Type here"
-                  value={photoUrl}
-                  onChange={(e) => setPhotoURL(e.target.value)}
-                />
-              </fieldset>
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Edit Form */}
+          <div className="flex-1">
+            <div className="card bg-base-100 shadow-xl">
+              <div className="card-body">
+                <h2 className="card-title text-2xl mb-6">
+                  Profile Information
+                </h2>
 
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Age</legend>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Type here"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                />
-              </fieldset>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        First Name
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      className="input input-bordered w-full"
+                      placeholder="Enter first name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
+                  </div>
 
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Gender</legend>
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Type here"
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                />
-              </fieldset>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        Last Name
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      className="input input-bordered w-full"
+                      placeholder="Enter last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
 
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">About</legend>
-                <textarea
-                  className="textarea h-24"
-                  placeholder="About"
-                  value={about}
-                  onChange={(e) => setAbout(e.target.value)}
-                ></textarea>
-              </fieldset>
-              <div className="card-actions justify-center my-3">
-                <button className="btn btn-primary" onClick={handleEditProfile}>
-                  Save
-                </button>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        Photo URL
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      className="input input-bordered w-full"
+                      placeholder="Paste image URL"
+                      value={photoUrl}
+                      onChange={(e) => setPhotoURL(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-semibold">Age</span>
+                    </label>
+                    <input
+                      type="number"
+                      className="input input-bordered w-full"
+                      placeholder="Enter age"
+                      value={age}
+                      onChange={(e) => setAge(e.target.value)}
+                      min="1"
+                      max="120"
+                    />
+                  </div>
+
+                  <div className="form-control md:col-span-2">
+                    <label className="label">
+                      <span className="label-text font-semibold">Gender</span>
+                    </label>
+                    <select
+                      className="select select-bordered w-full"
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                    >
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="Other">Other</option>
+                      <option value="Prefer not to say">
+                        Prefer not to say
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="form-control md:col-span-2">
+                    <label className="label">
+                      <span className="label-text font-semibold">About</span>
+                    </label>
+                    <textarea
+                      className="textarea textarea-bordered h-32 w-full"
+                      placeholder="Tell us about yourself..."
+                      value={about}
+                      onChange={(e) => setAbout(e.target.value)}
+                    ></textarea>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="alert alert-error mt-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="stroke-current shrink-0 h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <div className="card-actions justify-end mt-6">
+                  <button
+                    className="btn btn-primary w-full md:w-auto"
+                    onClick={handleEditProfile}
+                  >
+                    Save Changes
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Profile Preview */}
+          <div className="lg:w-96">
+            <div className="sticky top-8">
+              <h2 className="text-xl font-semibold mb-4 text-center lg:text-center">
+                Profile Preview
+              </h2>
+              <UserCard
+                user={{ firstName, lastName, photoUrl, about, age, gender }}
+              />
+            </div>
+          </div>
         </div>
-        <UserCard
-          user={{ firstName, lastName, photoUrl, about, age, gender }}
-        />
       </div>
-    </>
+    </div>
   );
 };
 

@@ -12,7 +12,7 @@ const ForgotPassword = () => {
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [isLoading, setIsLoading] = useState(false); // New state for loading
+  const [isLoading, setIsLoading] = useState(false);
 
   // Email validation function
   const validateEmail = (email) => {
@@ -36,7 +36,6 @@ const ForgotPassword = () => {
       return;
     }
 
-    // Disable the button and set loading state
     setButtonDisabled(true);
     setIsLoading(true);
 
@@ -61,13 +60,13 @@ const ForgotPassword = () => {
         progress: undefined,
       });
 
-      setCountdown(30); // Set the countdown to 30 seconds
+      setCountdown(30);
 
       const interval = setInterval(() => {
         setCountdown((prevCountdown) => {
           if (prevCountdown <= 1) {
             clearInterval(interval);
-            setButtonDisabled(false); // Re-enable the button after countdown
+            setButtonDisabled(false);
             return 0;
           }
           return prevCountdown - 1;
@@ -85,7 +84,7 @@ const ForgotPassword = () => {
         progress: undefined,
       });
     } finally {
-      setIsLoading(false); // Re-enable the button after API call completes
+      setIsLoading(false);
     }
   };
 
@@ -103,47 +102,79 @@ const ForgotPassword = () => {
         draggable
         pauseOnHover
       />
-      <div className="flex items-center justify-center min-h-48 bg-base-100 my-20">
-        <div className="card bg-base-300 w-96 shadow-lg rounded-lg">
+      <div className="flex items-center justify-center min-h-[calc(100vh-160px)] bg-base-100 py-10 px-4">
+        <div className="card bg-base-300 w-full max-w-md shadow-lg rounded-lg">
           <div className="card-body p-6">
-            <h2 className="card-title text-2xl font-bold">Forgot Password</h2>
-            <div className="space-y-4 mt-4">
-              <input
-                type="email"
-                className={`input w-full p-2 border ${
-                  isEmailFocused && !validateEmail(email)
-                    ? "border-red-500"
-                    : "border-gray-300"
-                } rounded focus:outline-none focus:border-blue-500`}
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onFocus={() => setIsEmailFocused(true)}
-                onBlur={() => setIsEmailFocused(false)}
-              />
-              {isEmailFocused && !validateEmail(email) && (
-                <p className="text-red-500 text-sm">
-                  Please enter a valid email address.
-                </p>
-              )}
+            <h2 className="card-title text-2xl font-bold text-center">
+              Forgot Password
+            </h2>
+            <div className="space-y-4 mt-6">
+              <div>
+                <input
+                  type="email"
+                  className={`input w-full p-3 border ${
+                    isEmailFocused && !validateEmail(email)
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } rounded focus:outline-none focus:border-blue-500`}
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onFocus={() => setIsEmailFocused(true)}
+                  onBlur={() => setIsEmailFocused(false)}
+                />
+                {isEmailFocused && !validateEmail(email) && (
+                  <p className="text-red-500 text-sm mt-1">
+                    Please enter a valid email address.
+                  </p>
+                )}
+              </div>
             </div>
             <div className="card-actions justify-center mt-6">
               <button
-                className="btn btn-primary w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-300 flex items-center justify-center"
+                className={`btn btn-primary w-full py-3 rounded transition duration-300 flex items-center justify-center ${
+                  buttonDisabled || !validateEmail(email) || isLoading
+                    ? "opacity-70 cursor-not-allowed"
+                    : "hover:bg-blue-600"
+                }`}
                 onClick={handleForgotPassword}
-                disabled={buttonDisabled || !validateEmail(email) || isLoading} // Disable during loading or countdown
+                disabled={buttonDisabled || !validateEmail(email) || isLoading}
               >
-                {isLoading
-                  ? "Sending..."
-                  : buttonDisabled
-                  ? `Resend in ${countdown}s`
-                  : "Send reset link"}
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Sending...
+                  </span>
+                ) : buttonDisabled ? (
+                  `Resend in ${countdown}s`
+                ) : (
+                  "Send reset link"
+                )}
               </button>
             </div>
-            <div className="text-center mt-4">
+            <div className="text-center mt-6">
               <Link
                 to="/login"
-                className="text-blue-500 cursor-pointer hover:underline"
+                className="text-blue-500 hover:text-blue-600 cursor-pointer hover:underline transition duration-300"
               >
                 Remember Password? Login Here
               </Link>

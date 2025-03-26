@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
-import { ImSpinner8 } from "react-icons/im"; // For loading spinner
+import { ImSpinner8 } from "react-icons/im";
 
 const Login = () => {
   const [userName, setUserName] = useState("");
@@ -20,14 +20,25 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Email validation function
+  // Email validation
   const validateEmail = (email) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
   };
 
-  // Handle login
+  // Password validation - at least 8 chars, 1 number, 1 lowercase, 1 uppercase
+  const validatePassword = (pass) => {
+    // const re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+    // return re.test(pass);
+    return pass.length >= 8;
+  };
+
   const handleLogin = async () => {
+    if (!validateEmail(userName)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await axios.post(
@@ -48,8 +59,20 @@ const Login = () => {
     }
   };
 
-  // Handle signup
   const handleSignUp = async () => {
+    if (!validateEmail(userName)) {
+      setError("Please enter a valid email address");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setError(
+        // "Password must be 8+ characters with at least one number, one lowercase and one uppercase letter"
+        "Password must be 8+ characters"
+      );
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await axios.post(
@@ -73,81 +96,134 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-48 bg-base-100 my-20">
-      <div className="card bg-base-300 w-96 shadow-lg rounded-lg">
+    <div className="flex items-center justify-center min-h-[calc(100vh-160px)] bg-base-100 py-10 px-4">
+      <div className="card bg-base-300 w-full max-w-md shadow-lg rounded-lg">
         <div className="card-body p-6">
           <h2 className="card-title text-2xl font-bold text-center mb-4">
             {isLoginForm ? "Login" : "Sign Up"}
           </h2>
 
           {!isLoginForm && (
-            <>
-              <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="label">
+                  <span className="label-text">First Name</span>
+                </label>
                 <input
                   type="text"
-                  className="input w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  className="input input-bordered w-full"
                   placeholder="First Name"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
+                  required
                 />
+              </div>
+              <div>
+                <label className="label">
+                  <span className="label-text">Last Name</span>
+                </label>
                 <input
                   type="text"
-                  className="input w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
+                  className="input input-bordered w-full"
                   placeholder="Last Name"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
+                  required
                 />
               </div>
-            </>
+            </div>
           )}
 
-          <div className="space-y-4 mt-4">
-            <input
-              type="email"
-              className={`input w-full p-2 border ${
-                isUsernameFocused && !validateEmail(userName)
-                  ? "border-red-500"
-                  : "border-gray-300"
-              } rounded focus:outline-none focus:border-blue-500`}
-              placeholder="Email"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              onFocus={() => setIsUsernameFocused(true)}
-              onBlur={() => setIsUsernameFocused(false)}
-            />
-            {isUsernameFocused && !validateEmail(userName) && (
-              <p className="text-red-500 text-sm">
-                Please enter a valid email address.
-              </p>
-            )}
+          <div className="mt-4 space-y-4">
+            <div>
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                className={`input input-bordered w-full ${
+                  isUsernameFocused && !validateEmail(userName)
+                    ? "input-error"
+                    : ""
+                }`}
+                placeholder="Email"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                onFocus={() => setIsUsernameFocused(true)}
+                onBlur={() => setIsUsernameFocused(false)}
+                required
+              />
+              {isUsernameFocused && !validateEmail(userName) && (
+                <p className="text-error text-sm mt-1">
+                  Please enter a valid email address
+                </p>
+              )}
+            </div>
 
-            <input
-              type="password"
-              className="input w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => setIsPasswordFocused(true)}
-              onBlur={() => setIsPasswordFocused(false)}
-            />
-            {isPasswordFocused && (
-              <p className="text-gray-600 text-sm">
-                Must be 8+ characters, including a number, lowercase, and
-                uppercase letter.
-              </p>
-            )}
+            <div>
+              <label className="label">
+                <span className="label-text">Password</span>
+              </label>
+              <input
+                type="password"
+                className={`input input-bordered w-full ${
+                  isPasswordFocused &&
+                  !isLoginForm &&
+                  !validatePassword(password)
+                    ? "input-error"
+                    : ""
+                }`}
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => setIsPasswordFocused(true)}
+                onBlur={() => setIsPasswordFocused(false)}
+                required
+              />
+              {isPasswordFocused && !isLoginForm && (
+                <p
+                  className={`text-sm mt-1 ${
+                    validatePassword(password) ? "text-success" : "text-error"
+                  }`}
+                >
+                  {validatePassword(password)
+                    ? "Password meets requirements"
+                    : "Must be 8+ characters"}
+                </p>
+              )}
+            </div>
           </div>
 
-          {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
+          {error && (
+            <div className="alert alert-error mt-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="stroke-current shrink-0 h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
 
           <div className="card-actions justify-center mt-6">
             <button
-              className="btn btn-primary w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-300 flex items-center justify-center"
+              className="btn btn-primary w-full"
               onClick={isLoginForm ? handleLogin : handleSignUp}
               disabled={isLoading}
             >
               {isLoading ? (
-                <ImSpinner8 className="animate-spin mr-2" />
+                <>
+                  <ImSpinner8 className="animate-spin mr-2" />
+                  {isLoginForm ? "Logging in..." : "Signing up..."}
+                </>
               ) : isLoginForm ? (
                 "Login"
               ) : (
@@ -156,20 +232,21 @@ const Login = () => {
             </button>
           </div>
 
-          <div className="text-center mt-4">
+          <div className="text-center mt-4 space-y-2">
             <p
-              onClick={() => setIsLoginForm(!isLoginForm)}
-              className="text-blue-500 cursor-pointer hover:underline"
+              onClick={() => {
+                setIsLoginForm(!isLoginForm);
+                setError("");
+              }}
+              className="link link-primary"
             >
               {isLoginForm
                 ? "New User? Sign Up Here"
                 : "Existing User? Login Here"}
             </p>
             {isLoginForm && (
-              <Link to="/forgotPassword">
-                <p className="text-blue-500 cursor-pointer hover:underline mt-2">
-                  Forgot Password?
-                </p>
+              <Link to="/forgotPassword" className="link link-primary">
+                Forgot Password?
               </Link>
             )}
           </div>

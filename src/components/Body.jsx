@@ -15,31 +15,32 @@ const Body = () => {
 
   const fetchUser = async () => {
     try {
-      if (userData) {
-        return;
-      }
+      if (userData) return;
+
       const res = await axios.get(BASE_URL + "/profile/view", {
         withCredentials: true,
       });
       dispatch(addUser(res.data));
     } catch (err) {
-      if (err.status === 401) {
-        navigate("/login");
+      if (err.response?.status === 401) {
+        // Only redirect if we're not already on login page
+        if (!window.location.pathname.includes("/login")) {
+          navigate("/login");
+        }
       }
-      // console.log(err);
     }
   };
 
   useEffect(() => {
-    if (!userData) {
-      fetchUser();
-    }
+    fetchUser();
   }, []);
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <NavBar />
-      <Outlet />
+      <div className="flex-grow">
+        <Outlet />
+      </div>
       <Footer />
     </div>
   );
