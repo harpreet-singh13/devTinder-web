@@ -103,6 +103,9 @@ const Requests = () => {
 
       <div className="grid gap-4">
         {requests.map((request, index) => {
+          // Check if fromUserId exists
+          if (!request.fromUserId) return null; // or handle differently
+
           const { _id, photoUrl, firstName, lastName, gender, age, about } =
             request.fromUserId;
           return (
