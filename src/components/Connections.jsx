@@ -93,63 +93,73 @@ const Connections = () => {
       </motion.div>
 
       <div className="grid gap-4">
-        {connections.map((connection, index) => {
-          const { _id, photoUrl, firstName, lastName, gender, age, about } =
-            connection;
-          return (
-            <motion.div
-              key={_id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-base-300 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
-            >
-              <div className="flex flex-col sm:flex-row p-4 sm:p-6">
-                <div className="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6">
-                  <div className="relative">
-                    <img
-                      src={photoUrl || "/default-avatar.png"}
-                      alt={`${firstName}'s profile`}
-                      className="rounded-full h-16 w-16 sm:h-20 sm:w-20 object-cover border-2 border-primary"
-                      onError={(e) => {
-                        e.target.src = "/default-avatar.png";
-                      }}
-                    />
-                    <div className="absolute bottom-0 right-0 bg-green-500 rounded-full w-4 h-4 border-2 border-base-300"></div>
-                  </div>
-                </div>
+        {connections
+          .filter((connection) => connection && connection._id) // Filter out invalid connections
+          .map((connection, index) => {
+            const {
+              _id,
+              photoUrl = "",
+              firstName = "",
+              lastName = "",
+              gender,
+              age,
+              about,
+            } = connection || {};
 
-                <div className="flex-grow">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <h2 className="text-xl font-bold text-white">
-                        {firstName} {lastName}
-                      </h2>
-                      <div className="flex items-center text-sm text-gray-400 mt-1">
-                        {age && <span>{age} years</span>}
-                        {age && gender && <span className="mx-2">•</span>}
-                        {gender && <span>{gender}</span>}
-                      </div>
+            return (
+              <motion.div
+                key={_id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-base-300 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+              >
+                <div className="flex flex-col sm:flex-row p-4 sm:p-6">
+                  <div className="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6">
+                    <div className="relative">
+                      <img
+                        src={photoUrl || "/default-avatar.png"}
+                        alt={`${firstName}'s profile`}
+                        className="rounded-full h-16 w-16 sm:h-20 sm:w-20 object-cover border-2 border-primary"
+                        onError={(e) => {
+                          e.target.src = "/default-avatar.png";
+                        }}
+                      />
+                      <div className="absolute bottom-0 right-0 bg-green-500 rounded-full w-4 h-4 border-2 border-base-300"></div>
                     </div>
-                    <Link
-                      to={"/chat/" + _id}
-                      className="mt-4 sm:mt-0 inline-block"
-                    >
-                      <button className="btn btn-primary btn-sm sm:btn-md rounded-full px-6 flex items-center gap-2">
-                        <FiMessageSquare />
-                        <span>Chat</span>
-                      </button>
-                    </Link>
                   </div>
 
-                  {about && (
-                    <p className="mt-3 text-gray-300 line-clamp-2">{about}</p>
-                  )}
+                  <div className="flex-grow">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <h2 className="text-xl font-bold text-white">
+                          {firstName} {lastName}
+                        </h2>
+                        <div className="flex items-center text-sm text-gray-400 mt-1">
+                          {age && <span>{age} years</span>}
+                          {age && gender && <span className="mx-2">•</span>}
+                          {gender && <span>{gender}</span>}
+                        </div>
+                      </div>
+                      <Link
+                        to={"/chat/" + _id}
+                        className="mt-4 sm:mt-0 inline-block"
+                      >
+                        <button className="btn btn-primary btn-sm sm:btn-md rounded-full px-6 flex items-center gap-2">
+                          <FiMessageSquare />
+                          <span>Chat</span>
+                        </button>
+                      </Link>
+                    </div>
+
+                    {about && (
+                      <p className="mt-3 text-gray-300 line-clamp-2">{about}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          );
-        })}
+              </motion.div>
+            );
+          })}
       </div>
     </div>
   );
