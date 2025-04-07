@@ -14,27 +14,102 @@ const EditProfile = ({ user }) => {
   const [about, setAbout] = useState(user.about || "");
   const [error, setError] = useState("");
   const [toast, setToast] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(user.photoUrl || "");
 
   const dispatch = useDispatch();
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.match("image.*")) {
+        setError("Please select an image file (JPEG, PNG, GIF)");
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setError("Image size must be less than 10MB");
+        return;
+      }
+
+      setSelectedFile(file);
+      setError("");
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleEditProfile = async () => {
     setError("");
     try {
-      const res = await axios.patch(
-        BASE_URL + "/profile/edit",
-        { firstName, lastName, photoUrl, age, gender, about },
-        { withCredentials: true }
-      );
+      setIsUploading(true);
 
-      dispatch(addUser(res?.data?.data));
+      const formData = new FormData();
+
+      // Append profile data
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      if (age) formData.append("age", age);
+      if (gender) formData.append("gender", gender);
+      if (about) formData.append("about", about);
+
+      // Append file if selected
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      }
+
+      console.log("Sending profile update with:", {
+        firstName,
+        lastName,
+        age,
+        gender,
+        about,
+        hasFile: !!selectedFile,
+      });
+
+      const res = await axios.patch(`${BASE_URL}/profile/edit`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
+
+      console.log("Profile update response:", res.data);
+
+      // Update local state with new user data
+      const updatedUser = res.data.data;
+      dispatch(addUser(updatedUser));
+
+      // Update photo URL if a new image was uploaded
+      if (selectedFile) {
+        setPhotoURL(updatedUser.photoUrl);
+        setPreviewImage(updatedUser.photoUrl);
+      }
+
       setToast(true);
+      setSelectedFile(null);
 
       setTimeout(() => {
         setToast(false);
       }, 2000);
     } catch (error) {
-      console.error(error);
-      setError(error.response?.data?.message || "An error occurred");
+      console.error("Profile update failed:", error);
+      setError(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message ||
+          "An error occurred while saving your profile"
+      );
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -96,16 +171,33 @@ const EditProfile = ({ user }) => {
                   <div className="form-control">
                     <label className="label">
                       <span className="label-text font-semibold">
-                        Photo URL
+                        Profile Picture
                       </span>
                     </label>
                     <input
-                      type="text"
-                      className="input input-bordered w-full"
-                      placeholder="Paste image URL"
-                      value={photoUrl}
-                      onChange={(e) => setPhotoURL(e.target.value)}
+                      type="file"
+                      className="file-input file-input-bordered w-full"
+                      accept="image/*"
+                      onChange={handleFileChange}
                     />
+                    <div className="mt-2 text-sm text-gray-500">
+                      {selectedFile
+                        ? `Selected: ${selectedFile.name}`
+                        : "Upload a new profile picture (JPEG, PNG, GIF)"}
+                    </div>
+                    {photoUrl && !selectedFile && (
+                      <div className="mt-2 text-sm text-gray-500">
+                        Current image:{" "}
+                        <a
+                          href={photoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="link"
+                        >
+                          View
+                        </a>
+                      </div>
+                    )}
                   </div>
 
                   <div className="form-control">
@@ -178,8 +270,16 @@ const EditProfile = ({ user }) => {
                   <button
                     className="btn btn-primary w-full md:w-auto"
                     onClick={handleEditProfile}
+                    disabled={isUploading}
                   >
-                    Save Changes
+                    {isUploading ? (
+                      <>
+                        <span className="loading loading-spinner"></span>
+                        Uploading...
+                      </>
+                    ) : (
+                      "Save Changes"
+                    )}
                   </button>
                 </div>
               </div>
@@ -193,7 +293,14 @@ const EditProfile = ({ user }) => {
                 Profile Preview
               </h2>
               <UserCard
-                user={{ firstName, lastName, photoUrl, about, age, gender }}
+                user={{
+                  firstName,
+                  lastName,
+                  photoUrl: previewImage,
+                  about,
+                  age,
+                  gender,
+                }}
               />
             </div>
           </div>
